@@ -8,6 +8,7 @@ We will solving the [Advent of Code 2019](https://adventofcode.com/2019) problem
 
 - [Rust goals](#rust-goals)
 - [Github goals](#github-goals)
+- [Solutions](#solutions)
 
 ## Rust goals
 
@@ -21,3 +22,7 @@ We will solving the [Advent of Code 2019](https://adventofcode.com/2019) problem
   - issues
   - actions
   - pull requests
+
+## Solutions
+
+1. [solution](src/bin/day_01.rs) || [problem](https://adventofcode.com/2019/day/1)
