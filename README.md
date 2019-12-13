@@ -26,3 +26,4 @@ We will solving the [Advent of Code 2019](https://adventofcode.com/2019) problem
 ## Solutions
 
 1. [solution](src/bin/day_01.rs) || [problem](https://adventofcode.com/2019/day/1)
+2. [solution](src/bin/day_02.rs) || [problem](https://adventofcode.com/2019/day/2)
