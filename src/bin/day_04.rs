@@ -43,7 +43,7 @@ impl Digits {
         let mut count = 0;
 
         for i in 1..6 {
-            if self.0[i] == self.0[i - 1] {
+            if self.0[i] == self.0[i-1] {
                 count += 1;
             } else {
                 if count == 1 {
@@ -71,42 +71,38 @@ impl Digits {
     }
 }
 
-#[cfg(test)]
-mod day_04 {
-    use super::*;
-    #[test]
-    fn test_1_valid() {
-        assert!(Digits::new(111_111).is_valid_password_1());
-    }
+#[test]
+fn test_1_valid() {
+    assert!(Digits::new(111_111).is_valid_password_1());
+}
 
-    #[test]
-    fn test_1_decreasing() {
-        assert!(!Digits::new(223_450).is_valid_password_1());
-    }
+#[test]
+fn test_1_decreasing() {
+    assert!(!Digits::new(223_450).is_valid_password_1());
+}
 
-    #[test]
-    fn test_1_missing_double() {
-        assert!(!Digits::new(123_789).is_valid_password_1());
-    }
+#[test]
+fn test_1_missing_double() {
+    assert!(!Digits::new(123_789).is_valid_password_1());
+}
 
-    #[test]
-    fn test_2_valid() {
-        let uut = Digits::new(112_233);
-        assert!(uut.is_valid_password_1());
-        assert!(uut.has_double_strict());
-    }
+#[test]
+fn test_2_valid() {
+    let uut = Digits::new(112_233); 
+    assert!(uut.is_valid_password_1());
+    assert!(uut.has_double_strict());
+}
 
-    #[test]
-    fn test_2_invalid_double() {
-        let uut = Digits::new(123_444);
-        assert!(uut.is_valid_password_1());
-        assert!(!uut.has_double_strict());
-    }
+#[test]
+fn test_2_invalid_double() {
+    let uut = Digits::new(123_444); 
+    assert!(uut.is_valid_password_1());
+    assert!(!uut.has_double_strict());
+}
 
-    #[test]
-    fn test_2_valid_double() {
-        let uut = Digits::new(111_122);
-        assert!(uut.is_valid_password_1());
-        assert!(uut.has_double_strict());
-    }
+#[test]
+fn test_2_valid_double() {
+    let uut = Digits::new(111_122); 
+    assert!(uut.is_valid_password_1());
+    assert!(uut.has_double_strict());
 }

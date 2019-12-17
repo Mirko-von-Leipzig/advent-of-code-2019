@@ -77,27 +77,23 @@ impl std::str::FromStr for Modules {
     }
 }
 
-#[cfg(test)]
-mod day_01 {
-    use super::*;
-    #[test]
-    fn test_part_1() {
-        assert_eq!(Module::new(12).part_1(), 2);
-        assert_eq!(Module::new(14).part_1(), 2);
-        assert_eq!(Module::new(1969).part_1(), 654);
-        assert_eq!(Module::new(100_756).part_1(), 33583);
-    }
+#[test]
+fn test_part_1() {
+    assert_eq!(Module::new(12).part_1(), 2);
+    assert_eq!(Module::new(14).part_1(), 2);
+    assert_eq!(Module::new(1969).part_1(), 654);
+    assert_eq!(Module::new(100_756).part_1(), 33583);
+}
 
-    #[test]
-    fn test_part_2() {
-        assert_eq!(Module::new(14).part_2(), 2);
-        assert_eq!(Module::new(1969).part_2(), 966);
-        assert_eq!(Module::new(100_756).part_2(), 50346);
-    }
+#[test]
+fn test_part_2() {
+    assert_eq!(Module::new(14).part_2(), 2);
+    assert_eq!(Module::new(1969).part_2(), 966);
+    assert_eq!(Module::new(100_756).part_2(), 50346);
+}
 
-    #[test]
-    fn test_module_parse() {
-        assert_eq!("12".parse::<Module>().unwrap().mass, 12);
-        assert_eq!("1234".parse::<Module>().unwrap().mass, 1234);
-    }
+#[test]
+fn test_module_parse() {
+    assert_eq!("12".parse::<Module>().unwrap().mass, 12);
+    assert_eq!("1234".parse::<Module>().unwrap().mass, 1234);
 }
