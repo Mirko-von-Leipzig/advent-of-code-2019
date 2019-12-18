@@ -30,3 +30,4 @@ We will solving the [Advent of Code 2019](https://adventofcode.com/2019) problem
 3. [solution](src/bin/day_03.rs) || [problem](https://adventofcode.com/2019/day/3)
 4. [solution](src/bin/day_04.rs) || [problem](https://adventofcode.com/2019/day/4)
 5. [solution](src/bin/day_05.rs) || [problem](https://adventofcode.com/2019/day/5)
+6. [solution](src/bin/day_06.rs) || [problem](https://adventofcode.com/2019/day/6)
