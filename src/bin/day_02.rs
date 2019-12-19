@@ -1,5 +1,3 @@
-extern crate intcode;
-
 fn main() {
     let base_program = std::fs::read_to_string("src/inputs/day_02")
         .expect("Failed to read input file")
@@ -11,11 +9,10 @@ fn main() {
     program_1.set_verb(2);
 
     program_1.execute();
-    println!("Part 1: {}", program_1.get_zero());
+    println!("Part 1: {} == 5482655", program_1.get_zero());
 
     // part 2, brute force algorithm
     let target: i32 = 19_690_720;
-    println!("{}", target);
 
     let mut part_2: Option<i32> = None;
     'outer: for i in 0..99 {
@@ -33,7 +30,7 @@ fn main() {
     }
 
     match part_2 {
-        Some(x) => println!("Part 2: {}", x),
+        Some(x) => println!("Part 2: {} == 4967", x),
         None => println!(
             "Part 2: failed to find a noun, verb pair that results in {}",
             target

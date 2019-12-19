@@ -1,5 +1,7 @@
+use std::collections::VecDeque;
 use std::convert::TryFrom;
 
+#[derive(Debug)]
 enum OpCode {
     ADD(ParamterMode, ParamterMode),
     MULTIPLY(ParamterMode, ParamterMode),
@@ -136,16 +138,24 @@ impl TryFrom<i32> for OpCode {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Program {
     int_codes: Vec<i32>,
-    input: Option<i32>,
-    output: Option<i32>,
+    input: VecDeque<i32>,
+    output: VecDeque<i32>,
+    i_ptr: usize,
+}
+
+#[derive(PartialEq)]
+pub enum ProgramState {
+    RequiresInput,
+    Complete,
+    Err(String),
 }
 
 impl Program {
-    pub fn set_input(&mut self, input: i32) {
-        self.input = Some(input);
+    pub fn push_back_input(&mut self, input: i32) {
+        self.input.push_back(input);
     }
 
     pub fn set_noun(&mut self, noun: i32) {
@@ -160,104 +170,110 @@ impl Program {
         self.int_codes[0]
     }
 
-    pub fn get_output(&self) -> Option<i32> {
-        self.output
+    pub fn pop_output(&mut self) -> Option<i32> {
+        self.output.pop_front()
     }
 
-    pub fn execute(&mut self) {
-        let mut i: usize = 0;
-        while i < self.int_codes.len() {
-            match OpCode::try_from(self.int_codes[i]).unwrap() {
+    pub fn pop_latest_output(&mut self) -> Option<i32> {
+        self.output.pop_back()
+    }
+
+    pub fn execute(&mut self) -> ProgramState {
+        loop {
+            if self.i_ptr >= self.int_codes.len() {
+                return ProgramState::Err("Instruction pointer out of bounds".to_string());
+            }
+
+            match OpCode::try_from(self.int_codes[self.i_ptr]).unwrap() {
                 OpCode::ADD(mode_1, mode_2) => {
                     let x = match mode_1 {
-                        ParamterMode::POSITION => self.int_codes[self.int_codes[i + 1] as usize],
-                        ParamterMode::IMMEDIATE => self.int_codes[i + 1],
+                        ParamterMode::POSITION => self.int_codes[self.int_codes[self.i_ptr + 1] as usize],
+                        ParamterMode::IMMEDIATE => self.int_codes[self.i_ptr + 1],
                     };
                     let y = match mode_2 {
-                        ParamterMode::POSITION => self.int_codes[self.int_codes[i + 2] as usize],
-                        ParamterMode::IMMEDIATE => self.int_codes[i + 2],
+                        ParamterMode::POSITION => self.int_codes[self.int_codes[self.i_ptr + 2] as usize],
+                        ParamterMode::IMMEDIATE => self.int_codes[self.i_ptr + 2],
                     };
-                    let target = self.int_codes[i + 3] as usize;
+                    let target = self.int_codes[self.i_ptr + 3] as usize;
 
                     self.int_codes[target as usize] = x + y;
-                    i += 4;
+                    self.i_ptr += 4;
                 }
                 OpCode::MULTIPLY(mode_1, mode_2) => {
                     let x = match mode_1 {
-                        ParamterMode::POSITION => self.int_codes[self.int_codes[i + 1] as usize],
-                        ParamterMode::IMMEDIATE => self.int_codes[i + 1],
+                        ParamterMode::POSITION => self.int_codes[self.int_codes[self.i_ptr + 1] as usize],
+                        ParamterMode::IMMEDIATE => self.int_codes[self.i_ptr + 1],
                     };
                     let y = match mode_2 {
-                        ParamterMode::POSITION => self.int_codes[self.int_codes[i + 2] as usize],
-                        ParamterMode::IMMEDIATE => self.int_codes[i + 2],
+                        ParamterMode::POSITION => self.int_codes[self.int_codes[self.i_ptr + 2] as usize],
+                        ParamterMode::IMMEDIATE => self.int_codes[self.i_ptr + 2],
                     };
-                    let target = self.int_codes[i + 3] as usize;
+                    let target = self.int_codes[self.i_ptr + 3] as usize;
 
                     self.int_codes[target as usize] = x * y;
-                    i += 4;
+                    self.i_ptr += 4;
                 }
                 OpCode::INPUT => {
-                    let target = self.int_codes[i + 1] as usize;
-                    match self.input {
+                    let target = self.int_codes[self.i_ptr + 1] as usize;
+                    match self.input.pop_front() {
                         Some(v) => self.int_codes[target] = v,
-                        None => panic!("No input set for INPUT opcode"),
+                        None => return ProgramState::RequiresInput,
                     }
-                    i += 2;
+                    self.i_ptr += 2;
                 }
                 OpCode::OUTPUT(mode_1) => {
                     let value = match mode_1 {
-                        ParamterMode::POSITION => self.int_codes[self.int_codes[i + 1] as usize],
-                        ParamterMode::IMMEDIATE => self.int_codes[i + 1],
+                        ParamterMode::POSITION => self.int_codes[self.int_codes[self.i_ptr + 1] as usize],
+                        ParamterMode::IMMEDIATE => self.int_codes[self.i_ptr + 1],
                     };
 
-                    self.output = Some(value);
-                    println!("{}", value);
-                    i += 2;
+                    self.output.push_back(value);
+                    self.i_ptr += 2;
                 }
                 OpCode::TJUMP(mode_1, mode_2) => {
                     let x = match mode_1 {
-                        ParamterMode::POSITION => self.int_codes[self.int_codes[i + 1] as usize],
-                        ParamterMode::IMMEDIATE => self.int_codes[i + 1],
+                        ParamterMode::POSITION => self.int_codes[self.int_codes[self.i_ptr + 1] as usize],
+                        ParamterMode::IMMEDIATE => self.int_codes[self.i_ptr + 1],
                     };
                     let y = match mode_2 {
-                        ParamterMode::POSITION => self.int_codes[self.int_codes[i + 2] as usize],
-                        ParamterMode::IMMEDIATE => self.int_codes[i + 2],
+                        ParamterMode::POSITION => self.int_codes[self.int_codes[self.i_ptr + 2] as usize],
+                        ParamterMode::IMMEDIATE => self.int_codes[self.i_ptr + 2],
                     };
 
                     if x != 0 {
-                        i = usize::try_from(y).unwrap();
+                        self.i_ptr = usize::try_from(y).unwrap();
                     } else {
-                        i += 3;
+                        self.i_ptr += 3;
                     }
                 }
 
                 OpCode::FJUMP(mode_1, mode_2) => {
                     let x = match mode_1 {
-                        ParamterMode::POSITION => self.int_codes[self.int_codes[i + 1] as usize],
-                        ParamterMode::IMMEDIATE => self.int_codes[i + 1],
+                        ParamterMode::POSITION => self.int_codes[self.int_codes[self.i_ptr + 1] as usize],
+                        ParamterMode::IMMEDIATE => self.int_codes[self.i_ptr + 1],
                     };
                     let y = match mode_2 {
-                        ParamterMode::POSITION => self.int_codes[self.int_codes[i + 2] as usize],
-                        ParamterMode::IMMEDIATE => self.int_codes[i + 2],
+                        ParamterMode::POSITION => self.int_codes[self.int_codes[self.i_ptr + 2] as usize],
+                        ParamterMode::IMMEDIATE => self.int_codes[self.i_ptr + 2],
                     };
 
                     if x == 0 {
-                        i = usize::try_from(y).unwrap();
+                        self.i_ptr = usize::try_from(y).unwrap();
                     } else {
-                        i += 3;
+                        self.i_ptr += 3;
                     }
                 }
 
                 OpCode::LESSTHAN(mode_1, mode_2) => {
                     let x = match mode_1 {
-                        ParamterMode::POSITION => self.int_codes[self.int_codes[i + 1] as usize],
-                        ParamterMode::IMMEDIATE => self.int_codes[i + 1],
+                        ParamterMode::POSITION => self.int_codes[self.int_codes[self.i_ptr + 1] as usize],
+                        ParamterMode::IMMEDIATE => self.int_codes[self.i_ptr + 1],
                     };
                     let y = match mode_2 {
-                        ParamterMode::POSITION => self.int_codes[self.int_codes[i + 2] as usize],
-                        ParamterMode::IMMEDIATE => self.int_codes[i + 2],
+                        ParamterMode::POSITION => self.int_codes[self.int_codes[self.i_ptr + 2] as usize],
+                        ParamterMode::IMMEDIATE => self.int_codes[self.i_ptr + 2],
                     };
-                    let target = self.int_codes[i + 3] as usize;
+                    let target = self.int_codes[self.i_ptr + 3] as usize;
 
                     if x < y {
                         self.int_codes[target] = 1;
@@ -265,19 +281,19 @@ impl Program {
                         self.int_codes[target] = 0;
                     }
 
-                    i += 4;
+                    self.i_ptr += 4;
                 }
 
                 OpCode::EQUALS(mode_1, mode_2) => {
                     let x = match mode_1 {
-                        ParamterMode::POSITION => self.int_codes[self.int_codes[i + 1] as usize],
-                        ParamterMode::IMMEDIATE => self.int_codes[i + 1],
+                        ParamterMode::POSITION => self.int_codes[self.int_codes[self.i_ptr + 1] as usize],
+                        ParamterMode::IMMEDIATE => self.int_codes[self.i_ptr + 1],
                     };
                     let y = match mode_2 {
-                        ParamterMode::POSITION => self.int_codes[self.int_codes[i + 2] as usize],
-                        ParamterMode::IMMEDIATE => self.int_codes[i + 2],
+                        ParamterMode::POSITION => self.int_codes[self.int_codes[self.i_ptr + 2] as usize],
+                        ParamterMode::IMMEDIATE => self.int_codes[self.i_ptr + 2],
                     };
-                    let target = self.int_codes[i + 3] as usize;
+                    let target = self.int_codes[self.i_ptr + 3] as usize;
 
                     if x == y {
                         self.int_codes[target] = 1;
@@ -285,12 +301,14 @@ impl Program {
                         self.int_codes[target] = 0;
                     }
 
-                    i += 4;
+                    self.i_ptr += 4;
                 }
 
                 OpCode::EXIT => break,
             }
         }
+
+        ProgramState::Complete
     }
 }
 
@@ -305,8 +323,9 @@ impl std::str::FromStr for Program {
             .collect::<Result<Vec<i32>, Self::Err>>()?;
         Ok(Program {
             int_codes,
-            input: None,
-            output: None,
+            input: VecDeque::new(),
+            output: VecDeque::new(),
+            i_ptr: 0,
         })
     }
 }
@@ -323,9 +342,9 @@ mod int_code {
 
     fn test_program_inout(code: &str, input: i32, output: i32) {
         let mut program = code.parse::<Program>().unwrap();
-        program.set_input(input);
+        program.push_back_input(input);
         program.execute();
-        assert_eq!(program.output.unwrap(), output);
+        assert_eq!(program.pop_output().unwrap(), output);
     }
 
     #[test]

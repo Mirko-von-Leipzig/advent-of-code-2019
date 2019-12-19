@@ -10,3 +10,4 @@ members = ["intcode"]
 
 [dependencies]
 intcode = { path = "intcode" }
+itertools = "0.8.2"
