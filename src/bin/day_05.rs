@@ -5,18 +5,18 @@ fn main() {
         .expect("Failed to parse input");
 
     let mut diagnostic_1 = base_diagnostic.clone();
-    diagnostic_1.set_input(1);
+    diagnostic_1.push_back_input(1);
     diagnostic_1.execute();
 
 
     let mut diagnostic_2 = base_diagnostic;
-    diagnostic_2.set_input(5);
+    diagnostic_2.push_back_input(5);
     diagnostic_2.execute();
 
 
-    let part_1 = diagnostic_1.get_output();
-    let part_2 = diagnostic_2.get_output();
+    let part_1 = diagnostic_1.pop_latest_output().unwrap();
+    let part_2 = diagnostic_2.pop_latest_output().unwrap();
 
-    println!("Part 1: {:?}", part_1);
-    println!("Part 2: {:?}", part_2);
+    println!("Part 1: {:?} == 14155342", part_1);
+    println!("Part 2: {:?} == 8684145", part_2);
 }
